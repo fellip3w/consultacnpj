@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta CNPJ</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: calc(100% - 22px); /* Ajusta para padding e borda */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #resultado {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        #resultado p {
+            margin: 8px 0;
+            word-wrap: break-word; /* Para quebrar textos longos */
+        }
+         #resultado strong {
+            color: #333;
+        }
+        .loading, .error {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545; /* Vermelho */
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Consulta de CNPJ</h1>
+
+        <label for="cnpjInput">Digite o CNPJ (apenas números):</label>
+        <input type="text" id="cnpjInput" maxlength="14" placeholder="Ex: 00000000000191">
+
+        <button id="consultarBtn">Consultar</button>
+
+        <!-- Área para exibir o resultado -->
+        <div id="resultado">
+            <!-- Os dados do CNPJ serão inseridos aqui pelo JavaScript -->
+        </div>
+
+         <!-- Área para mensagens de loading ou erro -->
+         <div id="status"></div>
+
+    </div>
+
+    <!-- Incluir o arquivo JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
