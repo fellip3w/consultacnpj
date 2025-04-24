@@ -1,0 +1,677 @@
+/* === Variáveis Globais === */
+:root {
+    --font-family: 'Bahnschrift', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --primary-color: #000000; /* Preto */
+    --secondary-color: #FFD700; /* Amarelo TexCotton (Ajuste se necessário) */
+    --accent-color: #FFA500; /* Amarelo mais escuro para hover/gradiente */
+    --text-color-light: #f4f4f4;
+    --text-color-dark: #333;
+    --background-color: #f8f9fa; /* Fundo principal levemente cinza */
+    --card-background: #ffffff;
+    --border-color: #dee2e6;
+    --success-color: #28a745;
+    --error-color: #dc3545;
+    --info-color: #17a2b8;
+
+    --sidebar-width-collapsed: 70px;
+    --sidebar-width-expanded: 260px;
+    --header-height: 60px; /* Ajuste se tiver cabeçalho fixo */
+    --transition-speed: 0.3s;
+}
+
+/* === Reset Básico & Configurações Globais === */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color-dark);
+    line-height: 1.6;
+    overflow-x: hidden; /* Previne scroll horizontal causado pela sidebar */
+    padding-top: var(--header-height); /* Espaço para cabeçalho fixo, se houver */
+    padding-left: var(--sidebar-width-collapsed); /* Espaço inicial para sidebar */
+    transition: padding-left var(--transition-speed) ease;
+}
+
+body.sidebar-expanded {
+     padding-left: var(--sidebar-width-expanded);
+}
+
+h1, h2 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* Espaço entre ícone e texto do título */
+}
+h1 { font-size: 1.8rem; }
+h2 { font-size: 1.5rem; }
+
+a {
+    text-decoration: none;
+    color: var(--info-color);
+    transition: color var(--transition-speed) ease;
+}
+a:hover {
+    color: darken(var(--info-color), 10%);
+}
+
+/* === Sidebar === */
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: var(--sidebar-width-collapsed);
+    background: linear-gradient(to bottom, var(--primary-color) 85%, var(--accent-color));
+    color: var(--text-color-light);
+    padding-top: 15px;
+    overflow: hidden;
+    transition: width var(--transition-speed) ease;
+    z-index: 1000; /* Garante que fique acima do conteúdo */
+    display: flex;
+    flex-direction: column;
+}
+
+#sidebar:hover,
+#sidebar.expanded { /* Adicionamos classe .expanded para controle via JS se necessário */
+    width: var(--sidebar-width-expanded);
+}
+
+/* Logo na Sidebar */
+.logo-container {
+    text-align: center;
+    padding: 10px 0 20px 0;
+    height: var(--header-height); /* Mesmo tamanho do padding do body */
+    flex-shrink: 0; /* Não encolhe */
+}
+
+.logo-container img {
+    max-width: 80%;
+    height: auto;
+    transition: opacity var(--transition-speed) ease;
+}
+
+#logo-small {
+    max-height: 40px; /* Ajuste o tamanho do logo menor */
+    opacity: 1;
+}
+#logo-full {
+    max-height: 50px; /* Ajuste o tamanho do logo completo */
+    opacity: 0;
+    display: none; /* Começa escondido */
+}
+
+#sidebar:hover #logo-small,
+#sidebar.expanded #logo-small {
+    opacity: 0;
+    display: none;
+}
+#sidebar:hover #logo-full,
+#sidebar.expanded #logo-full {
+    opacity: 1;
+    display: inline-block; /* Ou block, dependendo do seu logo */
+}
+
+
+/* Menu da Sidebar */
+#sidebar nav {
+    flex-grow: 1; /* Ocupa o espaço restante */
+    overflow-y: auto; /* Scroll se necessário */
+}
+
+#sidebar nav ul {
+    list-style: none;
+}
+
+#sidebar nav ul li {
+    margin-bottom: 5px;
+}
+
+#sidebar nav ul li a {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: var(--text-color-light);
+    white-space: nowrap; /* Impede quebra de linha */
+    transition: background-color var(--transition-speed) ease, padding-left var(--transition-speed) ease;
+    position: relative; /* Para posicionar pseudo-elementos se necessário */
+}
+
+#sidebar nav ul li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+#sidebar nav ul li a i.fa-fw { /* Ícones principais */
+    width: 30px; /* Largura fixa para alinhamento */
+    text-align: center;
+    font-size: 1.2rem;
+    flex-shrink: 0; /* Não encolhe */
+    margin-right: 10px; /* Espaço inicial para o texto */
+    transition: margin-right var(--transition-speed) ease;
+}
+
+.menu-text {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease;
+    transition-delay: 0.1s; /* Pequeno atraso para aparecer */
+}
+
+#sidebar:hover .menu-text,
+#sidebar.expanded .menu-text {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Submenus */
+.submenu {
+    list-style: none;
+    padding-left: 25px; /* Indentação inicial */
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, padding var(--transition-speed) ease;
+    background-color: rgba(0, 0, 0, 0.2); /* Fundo levemente diferente */
+}
+
+.submenu.open {
+    max-height: 500px; /* Altura suficiente para os itens */
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.submenu li a {
+    padding: 8px 15px 8px 10px; /* Ajuste padding */
+    font-size: 0.9rem;
+    white-space: normal; /* Permite quebra de linha se necessário no expandido */
+    opacity: 0; /* Começa invisível */
+    transition: opacity 0.2s ease;
+    transition-delay: 0.1s; /* Aparece depois da sidebar expandir */
+    display: flex; /* Garante alinhamento com ícone */
+    align-items: center;
+}
+
+.submenu li a i.sub-icon {
+    width: 20px;
+    margin-right: 8px;
+    font-size: 0.8rem;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    transition-delay: 0.15s; /* Ícone aparece um pouco depois */
+}
+
+#sidebar:hover .submenu li a,
+#sidebar.expanded .submenu li a {
+     opacity: 1;
+}
+#sidebar:hover .submenu li a i.sub-icon,
+#sidebar.expanded .submenu li a i.sub-icon {
+    opacity: 1;
+}
+
+
+/* Estilo do item de menu ativo (opcional) */
+#sidebar nav ul li a.active,
+.submenu li a.active {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    font-weight: bold;
+}
+#sidebar nav ul li a.active:hover,
+.submenu li a.active:hover {
+     background-color: var(--accent-color);
+}
+
+
+/* === Conteúdo Principal === */
+#main-content {
+    padding: 25px;
+    transition: margin-left var(--transition-speed) ease;
+    margin-left: var(--sidebar-width-collapsed); /* Mesmo que o padding do body */
+}
+
+/* Ajuste da margem quando a sidebar expande (se não usar padding no body) */
+/* #sidebar:hover + #main-content,
+#sidebar.expanded + #main-content {
+    margin-left: var(--sidebar-width-expanded);
+} */
+
+/* Views de Conteúdo */
+.content-view {
+    display: none; /* Escondido por padrão */
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.content-view.active {
+    display: block; /* Mostra a view ativa */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Cards */
+.card {
+    background-color: var(--card-background);
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+    transition: box-shadow var(--transition-speed) ease;
+}
+.card:hover {
+     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Formulários e Botões */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: var(--text-color-dark);
+}
+
+input[type="text"],
+input[type="file"],
+select {
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+
+input[type="text"]:focus,
+select:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.3); /* Glow amarelo */
+    outline: none;
+}
+
+input[type="file"] {
+    border: none; /* Remove borda padrão */
+    padding: 0; /* Remove padding padrão */
+}
+
+.file-label {
+    display: inline-block; /* Ou block */
+    margin-bottom: 10px;
+}
+
+/* Estilo customizado para input file (opcional, mais complexo) */
+/* input[type="file"]::file-selector-button { ... } */
+
+
+button, .btn-primary, .btn-secondary {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: var(--font-family);
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color var(--transition-speed) ease, transform 0.1s ease;
+    display: inline-flex; /* Para alinhar ícone e texto */
+    align-items: center;
+    gap: 8px; /* Espaço entre ícone e texto */
+    margin-right: 10px; /* Espaço entre botões */
+    margin-bottom: 10px; /* Espaço abaixo */
+}
+button:hover, .btn-primary:hover, .btn-secondary:hover {
+    transform: translateY(-2px); /* Leve levantada */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+button:active, .btn-primary:active, .btn-secondary:active {
+     transform: translateY(0);
+     box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+.btn-primary:hover {
+    background-color: #333; /* Escurece um pouco */
+}
+.btn-primary:disabled {
+    background-color: #aaa;
+    color: #eee;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+
+.btn-secondary {
+    background-color: #6c757d; /* Cinza */
+    color: var(--text-color-light);
+}
+.btn-secondary:hover {
+     background-color: #5a6268;
+}
+
+
+/* Mensagens de Status e Resultados */
+.status-message {
+    margin-top: 15px;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    display: none; /* Escondido por padrão */
+    animation: fadeIn 0.3s;
+}
+.status-message.error {
+    background-color: lighten(var(--error-color), 35%);
+    color: var(--error-color);
+    border: 1px solid var(--error-color);
+    display: block;
+}
+.status-message.success {
+    background-color: lighten(var(--success-color), 45%);
+    color: var(--success-color);
+     border: 1px solid var(--success-color);
+    display: block;
+}
+.status-message.loading {
+    background-color: lighten(var(--info-color), 40%);
+    color: var(--info-color);
+     border: 1px solid var(--info-color);
+    display: block;
+}
+
+.resultado-container {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f1f3f5; /* Fundo levemente diferente para destaque */
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    word-wrap: break-word;
+}
+.resultado-container p {
+    margin-bottom: 10px;
+    border-bottom: 1px dashed #e0e0e0;
+    padding-bottom: 10px;
+}
+.resultado-container p:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+.resultado-container strong {
+    color: var(--primary-color);
+    margin-right: 5px;
+    display: inline-block;
+    min-width: 150px; /* Alinhamento */
+}
+.resultado-container hr {
+    border: 0;
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 15px 0;
+}
+.sim { color: var(--success-color); font-weight: bold; }
+.nao { color: var(--error-color); font-weight: bold; }
+.na { color: #6c757d; font-style: italic; } /* Não aplicável / Não encontrado */
+
+
+/* Tabela de Resultados Excel */
+#resultsExcelCard {
+    margin-top: 25px;
+}
+.table-container {
+    max-height: 60vh; /* Altura máxima antes de scroll */
+    overflow-y: auto; /* Scroll vertical */
+    overflow-x: auto; /* Scroll horizontal se necessário */
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    margin-top: 15px;
+}
+
+#cnpjResultsTable {
+    width: 100%;
+    border-collapse: collapse; /* Remove espaços entre células */
+    white-space: nowrap; /* Previne quebra de linha inicial */
+}
+
+#cnpjResultsTable thead {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    position: sticky; /* Cabeçalho fixo */
+    top: 0;
+    z-index: 10;
+}
+
+#cnpjResultsTable th,
+#cnpjResultsTable td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+#cnpjResultsTable th {
+    font-weight: bold;
+}
+
+#cnpjResultsTable tbody tr {
+    transition: background-color var(--transition-speed) ease, transform 0.15s ease;
+    background-color: var(--card-background);
+}
+
+#cnpjResultsTable tbody tr:nth-child(even) {
+    background-color: #f8f9fa; /* Zebrado leve */
+}
+
+
+#cnpjResultsTable tbody tr:hover {
+    background-color: var(--secondary-color) !important; /* Amarelo no hover */
+    color: var(--primary-color);
+    transform: scale(1.01); /* Leve aumento */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    cursor: pointer; /* Indica que a linha é interativa (mesmo que só o botão seja clicável) */
+}
+#cnpjResultsTable tbody tr:hover td {
+     border-bottom-color: var(--accent-color);
+}
+
+/* Estilo específico para coluna de nome (truncar) */
+#cnpjResultsTable td:nth-child(2) { /* Segunda coluna (Nome) */
+    max-width: 300px; /* Largura máxima */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#cnpjResultsTable td:nth-child(2):hover { /* Mostrar completo no hover da célula */
+    white-space: normal;
+    overflow: visible;
+    max-width: none;
+    position: relative; /* Para sobrepor outras células se necessário */
+    background-color: inherit; /* Mantem fundo do hover da linha */
+}
+
+
+/* Botão de Informação na Tabela */
+.info-btn {
+    background: none;
+    border: none;
+    color: var(--info-color);
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 5px;
+    margin: 0;
+    display: inline-flex;
+    transition: color var(--transition-speed) ease, transform var(--transition-speed) ease;
+}
+.info-btn:hover {
+    color: darken(var(--info-color), 15%);
+    transform: scale(1.2);
+}
+
+#cnpjResultsTable tbody tr:hover .info-btn {
+    color: var(--primary-color); /* Muda cor do ícone no hover da linha */
+}
+
+
+/* Filtros da Tabela */
+#table-controls {
+    display: flex;
+    flex-wrap: wrap; /* Quebra linha em telas menores */
+    gap: 10px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+.filter-input {
+    padding: 8px 10px;
+    flex-grow: 1; /* Tenta ocupar espaço igual */
+    min-width: 120px; /* Largura mínima */
+    margin-bottom: 0; /* Remove margem padrão do input */
+    font-size: 0.9rem;
+}
+#clearFiltersBtn {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    flex-grow: 0; /* Não cresce */
+}
+
+
+/* Modal */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1050; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.6); /* Black w/ opacity */
+    align-items: center;
+    justify-content: center;
+    animation: fadeInModalBg 0.4s ease;
+}
+
+.modal-content {
+    background-color: var(--card-background);
+    margin: auto;
+    padding: 30px;
+    border: 1px solid var(--border-color);
+    width: 80%; /* Could be more specific */
+    max-width: 700px; /* Max width */
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    position: relative;
+    animation: slideInModal 0.4s ease-out;
+}
+
+.close-button {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    transition: color 0.2s ease;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: var(--error-color);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#modal-body {
+    max-height: 60vh; /* Limita altura do conteúdo */
+    overflow-y: auto; /* Adiciona scroll se necessário */
+    margin-top: 20px;
+}
+
+@keyframes fadeInModalBg {
+    from { background-color: rgba(0, 0, 0, 0); }
+    to { background-color: rgba(0, 0, 0, 0.6); }
+}
+@keyframes slideInModal {
+     from { transform: translateY(-50px); opacity: 0; }
+     to { transform: translateY(0); opacity: 1; }
+}
+
+
+/* Loading Spinners */
+.loading-spinner {
+    text-align: center;
+    padding: 20px;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+.loading-spinner i {
+    margin-right: 10px;
+}
+
+
+/* Placeholder/Aviso de Construção */
+.construction-notice {
+    text-align: center;
+    padding: 40px 20px;
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+    color: #856404;
+}
+.construction-notice h2 {
+    color: #856404;
+    margin-bottom: 15px;
+}
+.construction-notice i {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    display: block;
+}
+
+
+/* === Media Queries (Responsividade Básica) === */
+@media (max-width: 768px) {
+    :root {
+        --sidebar-width-expanded: 220px;
+    }
+    body {
+         padding-left: 0; /* Remove padding inicial em telas pequenas */
+         padding-top: calc(var(--header-height) + 10px); /* Ajuste se a sidebar sobrepuser */
+    }
+    #sidebar {
+        width: 0; /* Esconde sidebar por padrão */
+        /* Você precisaria de um botão 'hamburger' para abrir/fechar em mobile */
+        /* Esta implementação foca no desktop com hover */
+    }
+     #sidebar:hover, #sidebar.expanded {
+         width: var(--sidebar-width-expanded); /* Mostra no hover mesmo em mobile (não ideal) */
+     }
+     #main-content {
+         margin-left: 0; /* Conteúdo ocupa tudo */
+     }
+     #table-controls {
+         flex-direction: column; /* Filtros um abaixo do outro */
+         align-items: stretch;
+     }
+     .filter-input {
+         width: 100%;
+     }
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+    h1 { font-size: 1.6rem; }
+    h2 { font-size: 1.3rem; }
+}
